@@ -17,6 +17,3 @@ services:
         fromDatabase:
           name: alma-db
           property: connectionString
-databases:
-  - name: alma-db
-    plan: free
