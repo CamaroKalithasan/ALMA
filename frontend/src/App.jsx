@@ -4,6 +4,8 @@ import CalendarView from './components/CalendarView';
 import axios from 'axios';
 import './App.css';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [lastTranscription, setLastTranscription] = useState(null);
@@ -29,7 +31,7 @@ function App() {
   }, []);
 
   const handleLogin = () => {
-    window.location.href = 'http://localhost:3000/auth/google';
+    window.location.href = `${API_BASE}/auth/google`;
   };
 
   const handleTranscription = async (data) => {

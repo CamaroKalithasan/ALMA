@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 const VoiceRecorder = ({ onTranscriptionComplete }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [status, setStatus] = useState('');
