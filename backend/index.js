@@ -41,7 +41,8 @@ app.get('/oauth2callback', async (req, res) => {
   const { code } = req.query;
   const { tokens } = await oauth2Client.getToken(code);
   req.session.tokens = tokens;
-  res.redirect('http://localhost:5173');
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  res.redirect(frontendUrl);
 });
 
 // Get events
