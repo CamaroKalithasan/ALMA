@@ -10,6 +10,7 @@ const { addDays, format, parseISO } = require('date-fns');
 dotenv.config();
 const app = express();
 
+app.get('/ping', (req, res) => res.send('pong')); // testing deployment
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieSession({
