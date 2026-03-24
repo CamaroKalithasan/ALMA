@@ -8,6 +8,8 @@ const OpenAI = require('openai');
 const { addDays, format, parseISO } = require('date-fns');
 
 dotenv.config();
+console.log('SESSION_SECRET exists?', !!process.env.SESSION_SECRET);
+console.log('SESSION_SECRET length:', process.env.SESSION_SECRET ? process.env.SESSION_SECRET.length : 0);
 const app = express();
 
 app.get('/ping', (req, res) => res.send('pong')); // testing deployment
