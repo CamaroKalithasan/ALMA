@@ -32,13 +32,16 @@ const VoiceRecorder = ({ onTranscriptionComplete }) => {
         reader.readAsDataURL(audioBlob);
         reader.onloadend = async () => {
           const base64Audio = reader.result;
+          const userOffset = -new Date().getTimezoneOffset() / 60; // hours
+          const sign = userOffset >= 0 ? '+' : '-';
+          const absOffset = Math.abs(userOffset);
+          const userOffsetString = `${sign}${String(absOffset).padStart(2,'0')}:00`;
           
           try {
             const response = await axios.post(`${API_BASE}/api/process-voice`, {
-              audio: base64Audio
-            }, {
-              withCredentials: true
-            });
+              audio: base64Audio,
+              userTimezone: userOffsetString
+            }, { withCredentials: true });
             
             setStatus('Done!');
             onTranscriptionComplete(response.data);

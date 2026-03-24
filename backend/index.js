@@ -104,7 +104,7 @@ app.delete('/api/calendar/events/:eventId', async (req, res) => {
 
 // Voice processing (Whisper + GPT)
 app.post('/api/process-voice', async (req, res) => {
-  const { audio } = req.body; // base64 audio string (e.g., "data:audio/webm;base64,AAAA...")
+  const { audio, userTimezone } = req.body; // base64 audio string (e.g., "data:audio/webm;base64,AAAA...")
 
   try {
     // 1. Extract the base64 data (remove the data URL prefix)
@@ -124,10 +124,12 @@ app.post('/api/process-voice', async (req, res) => {
 
     // Get current date and time info for context
     const now = new Date();
-    const offsetMinutes = now.getTimezoneOffset(); // e.g., 240 for EDT
-    const offsetHours = Math.floor(Math.abs(offsetMinutes) / 60);
-    const offsetSign = offsetMinutes > 0 ? '-' : '+';
-    const offsetString = `${offsetSign}${String(offsetHours).padStart(2,'0')}:${String(Math.abs(offsetMinutes) % 60).padStart(2,'0')}`;
+    const serverOffsetMinutes = now.getTimezoneOffset();
+    const serverOffsetHours = Math.floor(Math.abs(serverOffsetMinutes) / 60);
+    const serverOffsetSign = serverOffsetMinutes > 0 ? '-' : '+';
+    const serverOffsetString = `${serverOffsetSign}${String(serverOffsetHours).padStart(2,'0')}:${String(Math.abs(serverOffsetMinutes) % 60).padStart(2,'0')}`;
+    // Use user's offset if provided, otherwise fall back to server offset
+    const offsetString = userTimezone || serverOffsetString;
 
     // 4. Parse intent with GPT
     const gptResponse = await openai.chat.completions.create({
