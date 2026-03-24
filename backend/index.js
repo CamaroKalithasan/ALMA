@@ -15,14 +15,17 @@ const app = express();
 app.get('/ping', (req, res) => res.send('pong')); // testing deployment
 app.use(cors({ origin: 'https://alma-gamma.vercel.app', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
+// Tell Express to trust the first proxy (Render/Cloudflare)
+app.set('trust proxy', 1);
+
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: true,          // must be true
-    sameSite: 'none',      // required for cross‑origin
+    secure: (req) => req.secure,   // only set Secure flag if request is HTTPS
+    sameSite: 'none',
     maxAge: 24 * 60 * 60 * 1000
   }
 }));
