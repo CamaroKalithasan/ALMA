@@ -1,11 +1,11 @@
 const express = require('express');
 const { google } = require('googleapis');
-const cookieSession = require('cookie-session');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const axios = require('axios');
 const OpenAI = require('openai');
 const { addDays, format, parseISO } = require('date-fns');
+const session = require('express-session');
 
 dotenv.config();
 console.log('SESSION_SECRET exists?', !!process.env.SESSION_SECRET);
@@ -15,13 +15,16 @@ const app = express();
 app.get('/ping', (req, res) => res.send('pong')); // testing deployment
 app.use(cors({ origin: 'https://alma-gamma.vercel.app', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
-app.use(cookieSession({
-  name: 'session',
-  keys: [process.env.SESSION_SECRET],
-  maxAge: 24 * 60 * 60 * 1000,
-  sameSite: 'none',   // Allows cross‑origin requests
-  secure: true,       // Required for sameSite=none (both sites are HTTPS)
-  httpOnly: true,
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: true,          // required for HTTPS
+    sameSite: 'none',      // required for cross‑origin
+    maxAge: 24 * 60 * 60 * 1000
+  }
 }));
 
 const oauth2Client = new google.auth.OAuth2(
