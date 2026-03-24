@@ -34,7 +34,7 @@ const VoiceRecorder = ({ onTranscriptionComplete }) => {
           const base64Audio = reader.result;
           
           try {
-            const response = await axios.post('http://localhost:3000/api/process-voice', {
+            const response = await axios.post(`${API_BASE}/api/process-voice`, {
               audio: base64Audio
             }, {
               withCredentials: true

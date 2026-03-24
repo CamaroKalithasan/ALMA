@@ -17,7 +17,7 @@ function App() {
     // Check if we have a session cookie by trying to fetch events
     const checkAuth = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/calendar/events', {
+        const response = await fetch(`${API_BASE}/api/calendar/events`, {
           credentials: 'include'
         });
         if (response.ok) {
@@ -46,7 +46,7 @@ function App() {
       // CREATE EVENT
       if (intent === 'create_event' && details) {
         await axios.post(
-          'http://localhost:3000/api/calendar/events',
+          `${API_BASE}/api/calendar/events`,
           {
             summary: details.summary,
             description: details.description || '',
@@ -62,7 +62,7 @@ function App() {
       if (intent === 'delete_event' && deleteDetails?.summary) {
         // Fetch current events to find the one to delete
         const eventsRes = await axios.get(
-          'http://localhost:3000/api/calendar/events',
+          `${API_BASE}/api/calendar/events`,
           { withCredentials: true }
         );
         const events = eventsRes.data;
@@ -75,7 +75,7 @@ function App() {
 
         if (eventToDelete) {
           await axios.delete(
-            `http://localhost:3000/api/calendar/events/${eventToDelete.id}`,
+            `${API_BASE}/api/calendar/events/${eventToDelete.id}`,
             { withCredentials: true }
           );
           console.log('Event deleted');
@@ -98,7 +98,7 @@ function App() {
     setIsApplying(true);
     try {
       const response = await axios.post(
-        'http://localhost:3000/api/calendar/events/reschedule',
+        `${API_BASE}/api/calendar/events/reschedule`,
         {
           eventId: suggestion.event.id,
           newStart: suggestion.proposedStart,
