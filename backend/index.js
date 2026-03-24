@@ -44,12 +44,14 @@ app.get('/oauth2callback', async (req, res) => {
   const { code } = req.query;
   const { tokens } = await oauth2Client.getToken(code);
   req.session.tokens = tokens;
+  console.log('Session saved. Session ID:', req.sessionID);
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
   res.redirect(frontendUrl);
 });
 
 // Get events
 app.get('/api/calendar/events', async (req, res) => {
+  console.log('Session in /api/calendar/events:', req.session);
   if (!req.session.tokens) return res.status(401).json({ error: 'Not authenticated' });
   oauth2Client.setCredentials(req.session.tokens);
   const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
