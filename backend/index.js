@@ -331,4 +331,14 @@ app.get('/set-session', (req, res) => {
   res.send('Session set. Check cookie.');
 });
 
+app.get('/test-cookie', (req, res) => {
+  res.cookie('test', 'value', {
+    httpOnly: true,
+    sameSite: 'none',
+    secure: true,
+    maxAge: 3600000
+  });
+  res.send('Cookie test. Check headers.');
+});
+
 app.listen(process.env.PORT, () => console.log(`Alma backend running on port ${process.env.PORT}`));
