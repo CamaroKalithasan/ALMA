@@ -325,4 +325,10 @@ app.post('/api/calendar/events/reschedule', async (req, res) => {
   }
 });
 
+app.get('/set-session', (req, res) => {
+  req.session.test = 'hello';
+  console.log('Set session test. Session ID:', req.sessionID);
+  res.send('Session set. Check cookie.');
+});
+
 app.listen(process.env.PORT, () => console.log(`Alma backend running on port ${process.env.PORT}`));
