@@ -11,6 +11,8 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 const locales = { 'en-US': enUS };
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 const CalendarView = ({ refreshTrigger }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +23,7 @@ const CalendarView = ({ refreshTrigger }) => {
 
   const fetchEvents = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/calendar/events', {
+      const response = await axios.get(`${API_BASE}/api/calendar/events`, {
         withCredentials: true
       });
       
