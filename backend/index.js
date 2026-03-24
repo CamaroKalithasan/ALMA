@@ -21,8 +21,8 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: true,          // required for HTTPS
-    sameSite: 'none',      // required for cross‑origin
+    // secure: true,   // comment out for now
+    // sameSite: 'none', // comment out
     maxAge: 24 * 60 * 60 * 1000
   }
 }));
