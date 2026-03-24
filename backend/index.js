@@ -11,12 +11,15 @@ dotenv.config();
 const app = express();
 
 app.get('/ping', (req, res) => res.send('pong')); // testing deployment
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({ origin: 'https://alma-gamma.vercel.app', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieSession({
   name: 'session',
   keys: [process.env.SESSION_SECRET],
-  maxAge: 24 * 60 * 60 * 1000
+  maxAge: 24 * 60 * 60 * 1000,
+  sameSite: 'none',   // Allows cross‑origin requests
+  secure: true,       // Required for sameSite=none (both sites are HTTPS)
+  httpOnly: true,
 }));
 
 const oauth2Client = new google.auth.OAuth2(
