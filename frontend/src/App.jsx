@@ -17,14 +17,18 @@ function App() {
     // Check if we have a session cookie by trying to fetch events
     const checkAuth = async () => {
       try {
+        console.log('Checking auth with', `${API_BASE}/api/calendar/events`);
         const response = await fetch(`${API_BASE}/api/calendar/events`, {
           credentials: 'include'
         });
+        console.log('Auth check response status:', response.status);
         if (response.ok) {
           setIsAuthenticated(true);
+        } else {
+          console.log('Auth check failed with status', response.status);
         }
       } catch (error) {
-        console.log('Not authenticated');
+        console.log('Not authenticated error:', error);
       }
     };
     checkAuth();
