@@ -326,21 +326,9 @@ app.post('/api/calendar/events/reschedule', async (req, res) => {
 });
 
 app.get('/set-session', (req, res) => {
-  console.log('Before set: session =', req.session);
-  console.log('Before set: sessionID =', req.sessionID);
-
   req.session.test = 'hello';
-  console.log('After set: session =', req.session);
-  console.log('After set: sessionID =', req.sessionID);
-
-  req.session.save((err) => {
-    if (err) {
-      console.error('Session save error:', err);
-      return res.status(500).send('Session save failed');
-    }
-    console.log('Session saved. sessionID after save =', req.sessionID);
-    res.send('Session set. Check cookie.');
-  });
+  console.log('Set session test. Session ID:', req.sessionID);
+  res.send('Session set. Check cookie.');
 });
 
 app.listen(process.env.PORT, () => console.log(`Alma backend running on port ${process.env.PORT}`));
