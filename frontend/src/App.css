@@ -22,6 +22,7 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--background-light);
   color: var(--text-dark);
+  overflow-x: hidden;
 }
 
 /* Splash Screen */
@@ -82,6 +83,7 @@ body {
 .app {
   display: flex;
   min-height: 100vh;
+  position: relative;
 }
 
 /* Sidebar */
@@ -180,11 +182,11 @@ body {
 /* Main Content */
 .main-content {
   flex: 1;
-  margin-left: 280px;
-  transition: margin-left 0.3s ease;
+  min-height: 100vh;
   padding: 2rem;
-  min-width: 0; /* Important for flex children to shrink properly */
-  max-width: calc(100% - 280px); /* Ensure proper width calculation */
+  transition: margin-left 0.3s ease;
+  margin-left: 280px;
+  width: calc(100% - 280px);
 }
 
 .main-content.expanded {
@@ -255,6 +257,97 @@ body {
   color: white;
 }
 
+.voice-status {
+  text-align: center;
+  margin-top: 1rem;
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+/* Transcription Result */
+.transcription-result {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.transcription-result h3 {
+  margin-bottom: 10px;
+  color: var(--text-dark);
+}
+
+.transcription-result p {
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+.transcription-result pre {
+  background: white;
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+/* Suggestion Section */
+.suggestion-section {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #e8f4fd;
+  border-left: 4px solid var(--primary-orange);
+  border-radius: 8px;
+}
+
+.suggestion-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.apply-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.apply-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dismiss-btn {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.dismiss-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Calendar Section */
+.calendar-section {
+  background: var(--primary-white);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  margin-top: 2rem;
+  width: 100%;
+}
+
+/* Calendar Responsive Styles */
+.calendar-section .rbc-calendar {
+  width: 100%;
+  min-width: 0;
+}
+
 /* Login Prompt */
 .login-prompt {
   text-align: center;
@@ -287,39 +380,42 @@ body {
   background: var(--primary-orange-dark);
 }
 
-/* Calendar Section */
-.calendar-section {
-  background: var(--primary-white);
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: var(--shadow-sm);
-  margin-top: 2rem;
-  width: 100%;
-  overflow-x: auto;
+/* Voice Recorder Hidden */
+.voice-recorder {
+  display: none;
 }
 
-.calendar-section > div {
-  width: 100%;
-  min-width: 0; /* Allow calendar to shrink properly */
-}
-
-/* Responsive */
+/* Responsive Design */
 @media (max-width: 768px) {
   .sidebar {
     width: 260px;
   }
+  
   .main-content {
     margin-left: 260px;
+    width: calc(100% - 260px);
     padding: 1rem;
   }
+  
+  .main-content.expanded {
+    margin-left: 0;
+    width: 100%;
+  }
+  
   .voice-assistant {
     width: 150px;
     height: 150px;
   }
+  
+  .mic-icon {
+    font-size: 2rem;
+  }
+  
   .calendar-section {
     overflow-x: auto;
   }
+  
   .calendar-section > div {
-    min-width: 600px; /* Ensures calendar doesn't get too cramped on mobile */
+    min-width: 600px;
   }
 }
