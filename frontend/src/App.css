@@ -109,26 +109,34 @@ body {
   position: fixed;
   left: 290px;
   top: 20px;
-  width: 32px;
-  height: 32px;
-  background: var(--primary-white);
-  border: 1px solid var(--border-light);
+  width: 40px;
+  height: 40px;
+  background: var(--primary-orange);
+  border: none;
   border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: left 0.3s ease;
+  transition: left 0.3s ease, background 0.2s ease, transform 0.2s ease;
   z-index: 101;
   box-shadow: var(--shadow-sm);
+  color: white;
+}
+
+.sidebar-toggle:hover {
+  background: var(--primary-orange-dark);
+  transform: scale(1.05);
+}
+
+.sidebar-toggle svg {
+  stroke: white;
+  width: 20px;
+  height: 20px;
 }
 
 .sidebar.collapsed + .sidebar-toggle {
   left: 20px;
-}
-
-.sidebar-toggle:hover {
-  background: var(--background-light);
 }
 
 .sidebar-content {
