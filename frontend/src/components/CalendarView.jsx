@@ -52,7 +52,7 @@ const CalendarView = ({ refreshTrigger }) => {
         events={events}
         startAccessor="start"
         endAccessor="end"
-        style={{ height: '100%' }}
+        style={{ height: '100%', width: '100%' }}
         defaultView="week"
         views={['month', 'week', 'day']}
       />

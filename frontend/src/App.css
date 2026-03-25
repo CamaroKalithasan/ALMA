@@ -183,10 +183,13 @@ body {
   margin-left: 280px;
   transition: margin-left 0.3s ease;
   padding: 2rem;
+  min-width: 0; /* Important for flex children to shrink properly */
+  width: calc(100% - 280px); /* Ensure proper width calculation */
 }
 
 .main-content.expanded {
   margin-left: 0;
+  width: 100%;
 }
 
 /* Voice Assistant Container */
@@ -292,9 +295,12 @@ body {
   box-shadow: var(--shadow-sm);
   margin-top: 2rem;
   width: 100%;
-  max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
+  overflow-x: auto;
+}
+
+.calendar-section > div {
+  width: 100%;
+  min-width: 0; /* Allow calendar to shrink properly */
 }
 
 /* Responsive */
@@ -309,5 +315,11 @@ body {
   .voice-assistant {
     width: 150px;
     height: 150px;
+  }
+  .calendar-section {
+    overflow-x: auto;
+  }
+  .calendar-section > div {
+    min-width: 600px; /* Ensures calendar doesn't get too cramped on mobile */
   }
 }
