@@ -187,6 +187,9 @@ body {
   transition: margin-left 0.3s ease;
   margin-left: 280px;
   width: calc(100% - 280px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .main-content.expanded {
@@ -199,6 +202,7 @@ body {
   display: flex;
   justify-content: center;
   margin-bottom: 2rem;
+  width: 100%;
 }
 
 .voice-assistant {
@@ -340,6 +344,9 @@ body {
   box-shadow: var(--shadow-sm);
   margin-top: 2rem;
   width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Calendar Responsive Styles */
@@ -385,6 +392,12 @@ body {
   display: none;
 }
 
+@media (min-width: 1400px) {
+  .calendar-section {
+    max-width: 1300px;
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .sidebar {
@@ -412,10 +425,11 @@ body {
   }
   
   .calendar-section {
+    max-width: 100%;
     overflow-x: auto;
   }
   
   .calendar-section > div {
-    min-width: 600px;
+    min-width: 700px;
   }
 }
