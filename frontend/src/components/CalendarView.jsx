@@ -46,7 +46,7 @@ const CalendarView = ({ refreshTrigger }) => {
   if (loading) return <div>Loading calendar...</div>;
 
   return (
-    <div style={{ height: '500px' }}>
+    <div style={{ height: '650px' }}>
       <Calendar
         localizer={localizer}
         events={events}
