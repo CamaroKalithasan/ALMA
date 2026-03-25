@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';  // Add useRef import
 import VoiceRecorder from './components/VoiceRecorder';
 import CalendarView from './components/CalendarView';
+import Sidebar from './components/Sidebar';
+import VoiceAssistant from './components/VoiceAssistant';
 import axios from 'axios';
 import './App.css';
 
@@ -8,27 +10,35 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState('calendar');
   const [lastTranscription, setLastTranscription] = useState(null);
   const [refreshCalendar, setRefreshCalendar] = useState(0);
   const [suggestion, setSuggestion] = useState(null);
   const [isApplying, setIsApplying] = useState(false);
+  const [isVoiceRecording, setIsVoiceRecording] = useState(false);
+  
+  // Add ref for VoiceRecorder
+  const voiceRecorderRef = useRef(null);
 
   useEffect(() => {
-    // Check if we have a session cookie by trying to fetch events
+    // Auto-hide splash screen after animation
+    const timer = setTimeout(() => setShowSplash(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     const checkAuth = async () => {
       try {
-        console.log('Checking auth with', `${API_BASE}/api/calendar/events`);
         const response = await fetch(`${API_BASE}/api/calendar/events`, {
           credentials: 'include'
         });
-        console.log('Auth check response status:', response.status);
         if (response.ok) {
           setIsAuthenticated(true);
-        } else {
-          console.log('Auth check failed with status', response.status);
         }
       } catch (error) {
-        console.log('Not authenticated error:', error);
+        console.log('Not authenticated');
       }
     };
     checkAuth();
@@ -47,7 +57,6 @@ function App() {
     const deleteDetails = data.intent?.deleteDetails;
 
     try {
-      // CREATE EVENT
       if (intent === 'create_event' && details) {
         await axios.post(
           `${API_BASE}/api/calendar/events`,
@@ -62,9 +71,7 @@ function App() {
         console.log('Event created');
       }
 
-      // DELETE EVENT
       if (intent === 'delete_event' && deleteDetails?.summary) {
-        // Fetch current events to find the one to delete
         const eventsRes = await axios.get(
           `${API_BASE}/api/calendar/events`,
           { withCredentials: true }
@@ -88,7 +95,6 @@ function App() {
         }
       }
 
-      // Refresh calendar after any change
       if (['create_event', 'delete_event'].includes(intent)) {
         setRefreshCalendar(prev => prev + 1);
       }
@@ -101,7 +107,7 @@ function App() {
   const applySuggestion = async (suggestion) => {
     setIsApplying(true);
     try {
-      const response = await axios.post(
+      await axios.post(
         `${API_BASE}/api/calendar/events/reschedule`,
         {
           eventId: suggestion.event.id,
@@ -111,7 +117,6 @@ function App() {
         { withCredentials: true }
       );
 
-      // Success: clear the suggestion and refresh calendar
       setSuggestion(null);
       setRefreshCalendar(prev => prev + 1);
       alert('Event rescheduled successfully!');
@@ -119,82 +124,113 @@ function App() {
       console.error('Error applying suggestion:', error);
       alert('Failed to reschedule. Please try again.');
     } finally {
-    setIsApplying(false);  // This always runs, re-enabling the button
+      setIsApplying(false);
     }
   };
-  // Helper to find an event by summary and approximate start time
+
   const findEventToDelete = (events, summary, startTime) => {
     return events.find(event => {
       const titleMatch = event.summary?.toLowerCase().includes(summary.toLowerCase());
       if (!titleMatch) return false;
       if (startTime) {
-        // Compare times within a 5-minute window
         const eventStart = new Date(event.start.dateTime || event.start.date);
         const targetStart = new Date(startTime);
         const timeDiff = Math.abs(eventStart - targetStart);
-        return timeDiff < 5 * 60 * 1000; // within 5 minutes
+        return timeDiff < 5 * 60 * 1000;
       }
-      return true; // if no time given, just match by title
+      return true;
     });
   };
 
+  if (showSplash) {
+    return (
+      <div className="splash-screen">
+        <div className="splash-content">
+          <h1>ALMA</h1>
+          <p className="tagline">AI Life Management Assistant</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>Alma</h1>
-        <p>Your AI Life Management Assistant</p>
-        {!isAuthenticated && (
-          <button onClick={handleLogin}>Connect Google Calendar</button>
-        )}
-      </header>
+      <Sidebar 
+        isCollapsed={isSidebarCollapsed}
+        toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
 
-      <main className="app-main">
-        {isAuthenticated ? (
-          <>
-            <section className="voice-section">
-              <VoiceRecorder onTranscriptionComplete={handleTranscription} />
-              {lastTranscription && (
-                <div className="transcription-result">
-                  <h3>I heard:</h3>
-                  <p>{lastTranscription.transcribedText}</p>
-                  <h3>Intent:</h3>
-                  <pre>{JSON.stringify(lastTranscription.intent, null, 2)}</pre>
-                </div>
-              )}
-            </section>
-
-            {suggestion && (
-            <section className="suggestion-section">
-              <h3>✨ Alma's Suggestion</h3>
-              <p>
-                To help with your overwhelmed feeling, I suggest moving
-                <strong> {suggestion.event.summary} </strong>
-                from {new Date(suggestion.event.originalStart).toLocaleTimeString()} to{' '}
-                {new Date(suggestion.proposedStart).toLocaleTimeString()} on{' '}
-                {new Date(suggestion.proposedStart).toLocaleDateString()}.
-              </p>
-              <div className="suggestion-actions">
-                <button onClick={() => applySuggestion(suggestion)} className="apply-btn" disabled={isApplying}> 
-                  {isApplying ? 'Applying...' : 'Apply'}
-                </button>
-                <button onClick={() => setSuggestion(null)} className="dismiss-btn" disabled={isApplying}>
-                  Dismiss
-                </button>
-              </div>
-            </section>
-            )}
-
-            <section className="calendar-section">
-              <CalendarView refreshTrigger={refreshCalendar} />
-            </section>
-          </>
-        ) : (
+      <div className={`main-content ${isSidebarCollapsed ? 'expanded' : ''}`}>
+        {!isAuthenticated ? (
           <div className="login-prompt">
             <p>Please connect your Google Calendar to get started</p>
             <button onClick={handleLogin}>Connect Now</button>
           </div>
+        ) : (
+          <>
+            <div className="voice-container">
+              <VoiceAssistant 
+                isListening={isVoiceRecording}
+                isIdle={!isVoiceRecording}
+                onClick={() => {
+                  // Trigger the hidden VoiceRecorder button
+                  if (voiceRecorderRef.current) {
+                    const button = voiceRecorderRef.current.querySelector('button');
+                    if (button) {
+                      button.click();
+                    }
+                  }
+                }}
+                status={isVoiceRecording ? 'Listening...' : 'Tap to speak'}
+              />
+            </div>
+
+            {/* Hidden VoiceRecorder component - we'll style it to be invisible */}
+            <div ref={voiceRecorderRef} style={{ display: 'none' }}>
+              <VoiceRecorder 
+                onTranscriptionComplete={handleTranscription}
+                onRecordingStateChange={setIsVoiceRecording}
+              />
+            </div>
+
+            {lastTranscription && (
+              <div className="transcription-result">
+                <h3>I heard:</h3>
+                <p>{lastTranscription.transcribedText}</p>
+                <h3>Intent:</h3>
+                <pre>{JSON.stringify(lastTranscription.intent, null, 2)}</pre>
+              </div>
+            )}
+
+            {suggestion && (
+              <section className="suggestion-section">
+                <h3>✨ Alma's Suggestion</h3>
+                <p>
+                  To help with your overwhelmed feeling, I suggest moving
+                  <strong> {suggestion.event.summary} </strong>
+                  from {new Date(suggestion.event.originalStart).toLocaleTimeString()} to{' '}
+                  {new Date(suggestion.proposedStart).toLocaleTimeString()} on{' '}
+                  {new Date(suggestion.proposedStart).toLocaleDateString()}.
+                </p>
+                <div className="suggestion-actions">
+                  <button onClick={() => applySuggestion(suggestion)} className="apply-btn" disabled={isApplying}>
+                    {isApplying ? 'Applying...' : 'Apply'}
+                  </button>
+                  <button onClick={() => setSuggestion(null)} className="dismiss-btn" disabled={isApplying}>
+                    Dismiss
+                  </button>
+                </div>
+              </section>
+            )}
+
+            <div className="calendar-section">
+              <CalendarView refreshTrigger={refreshCalendar} />
+            </div>
+          </>
         )}
-      </main>
+      </div>
     </div>
   );
 }

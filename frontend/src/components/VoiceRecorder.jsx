@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-const VoiceRecorder = ({ onTranscriptionComplete }) => {
+const VoiceRecorder = ({ onTranscriptionComplete, onRecordingStateChange }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [status, setStatus] = useState('');
   const mediaRecorderRef = useRef(null);
@@ -54,6 +54,10 @@ const VoiceRecorder = ({ onTranscriptionComplete }) => {
 
       mediaRecorderRef.current.start(1000);
       setIsRecording(true);
+      // Notify parent that recording started
+      if (onRecordingStateChange) {
+        onRecordingStateChange(true);
+      }
     } catch (error) {
       setStatus('Error: ' + error.message);
     }
@@ -64,6 +68,10 @@ const VoiceRecorder = ({ onTranscriptionComplete }) => {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
       setIsRecording(false);
+      // Notify parent that recording stopped
+      if (onRecordingStateChange) {
+        onRecordingStateChange(false);
+      }
     }
   };
 
