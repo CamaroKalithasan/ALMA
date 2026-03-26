@@ -46,6 +46,8 @@ function App() {
 
   const handleLogin = () => {
     window.location.href = `${API_BASE}/auth/google`;
+    alert(`Redirecting to: ${url}`);
+    window.location.href = url;
   };
 
   const handleTranscription = async (data) => {
@@ -161,7 +163,7 @@ function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
-      
+
       {!isSidebarCollapsed && (
         <div className="sidebar-overlay" onClick={() => setIsSidebarCollapsed(true)} />
       )}
