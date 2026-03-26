@@ -46,8 +46,6 @@ function App() {
 
   const handleLogin = () => {
     window.location.href = `${API_BASE}/auth/google`;
-    alert(`Redirecting to: ${url}`);
-    window.location.href = url;
   };
 
   const handleTranscription = async (data) => {
@@ -172,13 +170,7 @@ function App() {
         {!isAuthenticated ? (
           <div className="login-prompt">
             <p>Please connect your Google Calendar to get started</p>
-              <a 
-    href={`${API_BASE}/auth/google`}
-    className="login-button"
-  >
-    Connect Now
-  </a>
-            {/* <button onClick={handleLogin}>Connect Now</button> */}
+            <button onClick={handleLogin}>Connect Now</button>
           </div>
         ) : (
           <>
