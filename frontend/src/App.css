@@ -354,9 +354,7 @@ body {
   box-shadow: var(--shadow-sm);
   margin-top: 2rem;
   width: 100%;
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
+  box-sizing: border-box;
 }
 
 .calendar-section > div {
@@ -407,9 +405,11 @@ body {
   display: none;
 }
 
-@media (min-width: 1400px) {
+@media (min-width: 1600px) {
   .calendar-section {
-    max-width: 1300px;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
