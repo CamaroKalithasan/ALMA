@@ -11,7 +11,7 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [activeTab, setActiveTab] = useState('calendar');
   const [lastTranscription, setLastTranscription] = useState(null);
   const [refreshCalendar, setRefreshCalendar] = useState(0);
@@ -161,6 +161,10 @@ function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
+      
+      {!isSidebarCollapsed && (
+        <div className="sidebar-overlay" onClick={() => setIsSidebarCollapsed(true)} />
+      )}
 
       <div className={`main-content ${isSidebarCollapsed ? 'expanded' : ''}`}>
         {!isAuthenticated ? (
