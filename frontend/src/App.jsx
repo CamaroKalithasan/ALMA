@@ -172,7 +172,13 @@ function App() {
         {!isAuthenticated ? (
           <div className="login-prompt">
             <p>Please connect your Google Calendar to get started</p>
-            <button onClick={handleLogin}>Connect Now</button>
+              <a 
+    href={`${API_BASE}/auth/google`}
+    className="login-button"
+  >
+    Connect Now
+  </a>
+            {/* <button onClick={handleLogin}>Connect Now</button> */}
           </div>
         ) : (
           <>
