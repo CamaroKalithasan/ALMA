@@ -39,7 +39,9 @@ const oauth2Client = new google.auth.OAuth2(
 );
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const SCOPES = ['https://www.googleapis.com/auth/calendar'];
+const SCOPES = ['https://www.googleapis.com/auth/calendar',
+  'https://www.googleapis.com/auth/userinfo.email'
+];
 
 // --- Helper to fetch user info from Google ---
 async function getUserInfo(accessToken) {
