@@ -1,5 +1,4 @@
 import React from 'react';
-import { Calendar, Menu, X } from 'lucide-react';
 import { Calendar, ShoppingBag, Menu, X } from 'lucide-react';
 
 const Sidebar = ({ isCollapsed, toggleSidebar, activeTab, setActiveTab }) => {
@@ -12,13 +11,21 @@ const Sidebar = ({ isCollapsed, toggleSidebar, activeTab, setActiveTab }) => {
           </div>
           <ul className="sidebar-nav">
             <li>
-              <a href="#" className={activeTab === 'calendar' ? 'active' : ''} onClick={() => setActiveTab('calendar')}>
+              <a 
+                href="#" 
+                className={activeTab === 'calendar' ? 'active' : ''}
+                onClick={() => setActiveTab('calendar')}
+              >
                 <Calendar size={20} style={{ marginRight: '12px' }} />
                 Calendar
               </a>
             </li>
             <li>
-              <a href="#" className={activeTab === 'shopping' ? 'active' : ''} onClick={() => setActiveTab('shopping')}>
+              <a 
+                href="#" 
+                className={activeTab === 'shopping' ? 'active' : ''}
+                onClick={() => setActiveTab('shopping')}
+              >
                 <ShoppingBag size={20} style={{ marginRight: '12px' }} />
                 Shopping List
               </a>
