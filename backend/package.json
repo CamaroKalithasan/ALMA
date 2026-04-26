@@ -20,7 +20,8 @@
     "express-session": "^1.19.0",
     "form-data": "^4.0.5",
     "googleapis": "^171.4.0",
-    "openai": "^6.32.0"
+    "openai": "^6.32.0",
+    "pg": "^8.20.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

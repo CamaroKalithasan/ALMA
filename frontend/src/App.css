@@ -386,6 +386,86 @@ body {
   min-width: 0;
 }
 
+/* Shopping Section */
+.shopping-section {
+  margin-top: 2rem;
+}
+
+.shopping-container {
+  background: var(--primary-white);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+}
+
+.shopping-header {
+  margin-bottom: 1.5rem;
+}
+
+.shopping-header h2 {
+  color: var(--text-dark);
+  margin-bottom: 1rem;
+}
+
+.add-item-form {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.add-item-form input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.add-item-form button {
+  background: var(--primary-orange);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.shopping-items-list {
+  list-style: none;
+  padding: 0;
+}
+
+.shopping-items-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.shopping-items-list .empty-message {
+  color: var(--text-light);
+  justify-content: center;
+  padding: 2rem;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-light);
+  transition: color 0.2s;
+}
+
+.delete-btn:hover {
+  color: var(--primary-orange);
+}
+
 /* Login Prompt */
 .login-prompt {
   text-align: center;

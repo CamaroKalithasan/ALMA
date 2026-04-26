@@ -3,6 +3,7 @@ import VoiceRecorder from './components/VoiceRecorder';
 import CalendarView from './components/CalendarView';
 import Sidebar from './components/Sidebar';
 import VoiceAssistant from './components/VoiceAssistant';
+import ShoppingList from './components/ShoppingList';
 import axios from 'axios';
 import './App.css';
 
@@ -15,6 +16,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('calendar');
   const [lastTranscription, setLastTranscription] = useState(null);
   const [refreshCalendar, setRefreshCalendar] = useState(0);
+  const [refreshShopping, setRefreshShopping] = useState(0);
   const [suggestion, setSuggestion] = useState(null);
   const [isApplying, setIsApplying] = useState(false);
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
@@ -97,6 +99,19 @@ function App() {
 
       if (['create_event', 'delete_event'].includes(intent)) {
         setRefreshCalendar(prev => prev + 1);
+      }
+
+      if (intent === 'shopping_add' && data.intent?.shoppingDetails?.item) {
+        const item = data.intent.shoppingDetails.item;
+        try {
+          await axios.post(`${API_BASE}/api/shopping/add`, { itemName: item }, { withCredentials: true });
+          console.log(`Added "${item}" to shopping list`);
+          setRefreshShopping(prev => prev + 1);  // trigger refresh
+          // Optionally show a success message (or use a toast)
+        } catch (err) {
+          console.error('Failed to add shopping item', err);
+          alert('Failed to add item to shopping list');
+        }
       }
     } catch (error) {
       console.error('Error processing voice action:', error);
@@ -228,10 +243,16 @@ function App() {
                 </div>
               </section>
             )}
-
-            <div className="calendar-section">
-              <CalendarView refreshTrigger={refreshCalendar} />
-            </div>
+            {activeTab === 'calendar' && (
+              <div className="calendar-section">
+                <CalendarView refreshTrigger={refreshCalendar} />
+              </div>
+            )}
+            {activeTab === 'shopping' && (
+              <div className="shopping-section">
+                <ShoppingList refreshTrigger={refreshShopping} />
+              </div>
+            )}
           </>
         )}
       </div>
