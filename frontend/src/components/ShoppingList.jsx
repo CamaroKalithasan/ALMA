@@ -32,7 +32,7 @@ const ShoppingList = ({ refreshTrigger }) => {
   const addItem = async () => {
     if (!newItem.trim()) return;
     try {
-      const response = await axios.post(`${API_Base}/api/shopping/add`, { itemName: newItem }, { withCredentials: true });
+      const response = await axios.post(`${API_BASE}/api/shopping/add`, { itemName: newItem }, { withCredentials: true });
       setItems([response.data, ...items]);
       setNewItem('');
     } catch (err) {
