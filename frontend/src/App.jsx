@@ -103,10 +103,12 @@ function App() {
 
       if (intent === 'shopping_add' && data.intent?.shoppingDetails?.item) {
         const item = data.intent.shoppingDetails.item;
+        console.log('Processing shopping add, item:', item);
         try {
           await axios.post(`${API_BASE}/api/shopping/add`, { itemName: item }, { withCredentials: true });
           console.log(`Added "${item}" to shopping list`);
           setRefreshShopping(prev => prev + 1);  // trigger refresh
+          console.log('Incrementing refreshShopping from', prev, 'to', prev+1);
           // Optionally show a success message (or use a toast)
         } catch (err) {
           console.error('Failed to add shopping item', err);

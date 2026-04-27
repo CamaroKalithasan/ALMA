@@ -4,14 +4,17 @@ import { Trash2, Plus } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-const ShoppingList = () => {
+// accept refreshTrigger as a prop
+const ShoppingList = ({ refreshTrigger }) => {
   const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState('');
   const [loading, setLoading] = useState(true);
 
   const fetchItems = async () => {
+    console.log('Fetching items...');
     try {
       const response = await axios.get(`${API_BASE}/api/shopping/list`, { withCredentials: true });
+      console.log('Fetched items:', response.data);
       setItems(response.data);
     } catch (err) {
       console.error('Failed to fetch shopping list', err);
@@ -20,14 +23,16 @@ const ShoppingList = () => {
     }
   };
 
+  // add refreshTrigger to the dependency array
   useEffect(() => {
+    console.log('ShoppingList useEffect, refreshTrigger =', refreshTrigger);
     fetchItems();
-  }, []);
+  }, [refreshTrigger]);   // <-- now re-fetches when refreshTrigger changes
 
   const addItem = async () => {
     if (!newItem.trim()) return;
     try {
-      const response = await axios.post(`${API_BASE}/api/shopping/add`, { itemName: newItem }, { withCredentials: true });
+      const response = await axios.post(`${API_Base}/api/shopping/add`, { itemName: newItem }, { withCredentials: true });
       setItems([response.data, ...items]);
       setNewItem('');
     } catch (err) {
