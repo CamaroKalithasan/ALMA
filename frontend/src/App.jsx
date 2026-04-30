@@ -104,12 +104,14 @@ function App() {
       if (intent === 'shopping_add' && data.intent?.shoppingDetails?.item) {
         const item = data.intent.shoppingDetails.item;
         try {
-          await axios.post(`${API_BASE}/api/shopping/add`, { itemName: item }, { withCredentials: true });
-          console.log(`Added "${item}" to shopping list`);
-          setRefreshShopping(refreshShopping + 1);  // trigger refresh
+          for (const item of items) {
+            await axios.post(`${API_BASE}/api/shopping/add`, { itemName: item }, { withCredentials: true });
+            console.log(`Added "${item}" to shopping list`);
+          }
+          setRefreshShopping(refreshShopping + 1);
         } catch (err) {
-          console.error('Failed to add shopping item', err);
-          alert('Failed to add item to shopping list');
+          console.error('Failed to add one or more items', err);
+          alert('Failed to add some items. Please try again.');
         }
       }
       if (intent === 'shopping_remove' && data.intent?.shoppingDetails?.item) {
