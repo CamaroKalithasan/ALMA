@@ -127,7 +127,11 @@ function App() {
           console.log('Clearing entire shopping list');
           try {
             await axios.delete(`${API_BASE}/api/shopping/clear`, { withCredentials: true });
-            setRefreshShopping(refreshShopping + 1);
+            console.log('Clear API succeeded');
+            setRefreshShopping(prev => {
+              console.log('Incrementing refreshShopping from', prev, 'to', prev + 1);
+              return prev + 1;
+            });
             alert('Shopping list cleared!');
           } catch (err) {
             console.error('Failed to clear shopping list', err);
