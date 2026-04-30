@@ -162,6 +162,19 @@ app.delete('/api/shopping/remove/:id', async (req, res) => {
   }
 });
 
+app.delete('/api/shopping/clear', async (req, res) => {
+  if (!req.session.user || !req.session.user.email) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  try {
+    await db.query('DELETE FROM shopping_items WHERE user_email = $1', [req.session.user.email]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 // -------------------- Voice Processing (Whisper + GPT) --------------------
 app.post('/api/process-voice', async (req, res) => {
   const { audio, userTimezone } = req.body;
@@ -206,11 +219,24 @@ app.post('/api/process-voice', async (req, res) => {
                 * startTime: ISO 8601 string with offset (if mentioned, helps identify the exact event)
                 * description (optional)
             - shoppingDetails: (only if intent is shopping_add) an object with:
-                    * items: array of strings (e.g., ["eggs", "bacon", "toast"])
-                    Split the user's request into individual items. 
-                    Separate by commas or the word "and". 
-                    Include multi‑word items like "green beans" as a single string. 
-                    Always output an array, even for a single item (e.g., ["milk"]).
+                * items: array of strings (e.g., ["eggs", "bacon", "toast"])
+                  Split the user's request into individual items. 
+                  Separate by commas or the word "and". 
+                  Include multi‑word items like "green beans" as a single string. 
+                  Always output an array, even for a single item (e.g., ["milk"]).
+            - shoppingRemoveDetails: (only if intent is shopping_remove) an object with:
+                * item: string (the item to remove, or "everything" if user wants to clear the entire list)
+                If the user says "remove everything", "clear shopping list", "delete all items", or similar, set item to "everything".
+                Otherwise, extract the specific item name (e.g., "eggs"). Do NOT interpret as a calendar event deletion.
+
+                Important: If the user mentions removing items from a "shopping list" or "list", prioritize intent shopping_remove over delete_event. Only use delete_event for calendar events (meetings, appointments, etc.).
+
+                Examples:
+                User: "remove eggs from shopping list" → {"intent":"shopping_remove","shoppingRemoveDetails":{"item":"eggs"}}
+                User: "remove everything from my shopping list" → {"intent":"shopping_remove","shoppingRemoveDetails":{"item":"everything"}}
+                User: "clear all items" → {"intent":"shopping_remove","shoppingRemoveDetails":{"item":"everything"}}
+                User: "delete my meeting tomorrow" → {"intent":"delete_event","deleteDetails":{"summary":"meeting","startTime":"2025-03-25T10:00:00-04:00"}}
+
           Respond with valid JSON only.`
         },
         { role: 'user', content: text }

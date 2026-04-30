@@ -11,10 +11,8 @@ const ShoppingList = ({ refreshTrigger }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchItems = async () => {
-    console.log('Fetching items...');
     try {
       const response = await axios.get(`${API_BASE}/api/shopping/list`, { withCredentials: true });
-      console.log('Fetched items:', response.data);
       setItems(response.data);
     } catch (err) {
       console.error('Failed to fetch shopping list', err);
@@ -25,7 +23,6 @@ const ShoppingList = ({ refreshTrigger }) => {
 
   // add refreshTrigger to the dependency array
   useEffect(() => {
-    console.log('ShoppingList useEffect, refreshTrigger =', refreshTrigger);
     fetchItems();
   }, [refreshTrigger]);   // <-- now re-fetches when refreshTrigger changes
 
