@@ -120,23 +120,34 @@ function App() {
           alert('Failed to add some items');
         }
       }
-      if (intent === 'shopping_remove' && data.intent?.shoppingDetails?.item) {
-        const itemName = data.intent.shoppingDetails.item;
+      if (intent === 'shopping_remove') {
+        let itemName = data.intent?.shoppingDetails?.item;
+        // Check if user wants to remove everything
+        if (itemName && ['everything', 'all', 'everything from list', 'all items', 'the whole list'].some(phrase => itemName.toLowerCase().includes(phrase))) {
+          console.log('Clearing entire shopping list');
+          try {
+            await axios.delete(`${API_BASE}/api/shopping/clear`, { withCredentials: true });
+            setRefreshShopping(refreshShopping + 1);
+            alert('Shopping list cleared!');
+          } catch (err) {
+            console.error('Failed to clear shopping list', err);
+            alert('Failed to clear list');
+          }
+          return;
+        }
+        // Normal single‑item deletion
+        if (!itemName) return;
         console.log('Processing shopping remove, item:', itemName);
         try {
-          // Fetch current shopping list to get the item ID
           const listResponse = await axios.get(`${API_BASE}/api/shopping/list`, { withCredentials: true });
           const items = listResponse.data;
-          // Find an item that matches the name (case‑insensitive, trim)
           const matchedItem = items.find(i => i.item_name.toLowerCase().trim() === itemName.toLowerCase().trim());
           if (!matchedItem) {
             alert(`Could not find "${itemName}" in your shopping list.`);
             return;
           }
-          // Delete by ID
           await axios.delete(`${API_BASE}/api/shopping/remove/${matchedItem.id}`, { withCredentials: true });
           console.log(`Removed "${itemName}" from shopping list`);
-          // Refresh the list
           setRefreshShopping(refreshShopping + 1);
         } catch (err) {
           console.error('Failed to remove shopping item', err);
