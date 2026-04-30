@@ -101,17 +101,23 @@ function App() {
         setRefreshCalendar(prev => prev + 1);
       }
 
-      if (intent === 'shopping_add' && data.intent?.shoppingDetails?.item) {
-        const item = data.intent.shoppingDetails.item;
+      if (intent === 'shopping_add') {
+        let items = [];
+        if (data.intent?.shoppingDetails?.items) {
+          items = data.intent.shoppingDetails.items;
+        } else if (data.intent?.shoppingDetails?.item) {
+          items = [data.intent.shoppingDetails.item];
+        }
+        if (items.length === 0) return;
+        console.log('Processing shopping add for items:', items);
         try {
-          for (const item of items) {
-            await axios.post(`${API_BASE}/api/shopping/add`, { itemName: item }, { withCredentials: true });
-            console.log(`Added "${item}" to shopping list`);
-          }
+          await Promise.all(items.map(item =>
+            axios.post(`${API_BASE}/api/shopping/add`, { itemName: item }, { withCredentials: true })
+          ));
           setRefreshShopping(refreshShopping + 1);
         } catch (err) {
-          console.error('Failed to add one or more items', err);
-          alert('Failed to add some items. Please try again.');
+          console.error('Failed to add items', err);
+          alert('Failed to add some items');
         }
       }
       if (intent === 'shopping_remove' && data.intent?.shoppingDetails?.item) {

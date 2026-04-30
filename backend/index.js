@@ -206,7 +206,11 @@ app.post('/api/process-voice', async (req, res) => {
                 * startTime: ISO 8601 string with offset (if mentioned, helps identify the exact event)
                 * description (optional)
             - shoppingDetails: (only if intent is shopping_add) an object with:
-                * item: string (e.g., "milk")
+                    * items: array of strings (e.g., ["eggs", "bacon", "toast"])
+                    Split the user's request into individual items. 
+                    Separate by commas or the word "and". 
+                    Include multi‑word items like "green beans" as a single string. 
+                    Always output an array, even for a single item (e.g., ["milk"]).
           Respond with valid JSON only.`
         },
         { role: 'user', content: text }
