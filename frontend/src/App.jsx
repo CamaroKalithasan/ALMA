@@ -103,15 +103,36 @@ function App() {
 
       if (intent === 'shopping_add' && data.intent?.shoppingDetails?.item) {
         const item = data.intent.shoppingDetails.item;
-        console.log('Processing shopping add, item:', item);
         try {
           await axios.post(`${API_BASE}/api/shopping/add`, { itemName: item }, { withCredentials: true });
           console.log(`Added "${item}" to shopping list`);
           setRefreshShopping(refreshShopping + 1);  // trigger refresh
-          // Optionally show a success message (or use a toast)
         } catch (err) {
           console.error('Failed to add shopping item', err);
           alert('Failed to add item to shopping list');
+        }
+      }
+      if (intent === 'shopping_remove' && data.intent?.shoppingDetails?.item) {
+        const itemName = data.intent.shoppingDetails.item;
+        console.log('Processing shopping remove, item:', itemName);
+        try {
+          // Fetch current shopping list to get the item ID
+          const listResponse = await axios.get(`${API_BASE}/api/shopping/list`, { withCredentials: true });
+          const items = listResponse.data;
+          // Find an item that matches the name (case‑insensitive, trim)
+          const matchedItem = items.find(i => i.item_name.toLowerCase().trim() === itemName.toLowerCase().trim());
+          if (!matchedItem) {
+            alert(`Could not find "${itemName}" in your shopping list.`);
+            return;
+          }
+          // Delete by ID
+          await axios.delete(`${API_BASE}/api/shopping/remove/${matchedItem.id}`, { withCredentials: true });
+          console.log(`Removed "${itemName}" from shopping list`);
+          // Refresh the list
+          setRefreshShopping(refreshShopping + 1);
+        } catch (err) {
+          console.error('Failed to remove shopping item', err);
+          alert('Failed to remove item from shopping list');
         }
       }
     } catch (error) {
