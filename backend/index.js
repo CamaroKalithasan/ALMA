@@ -439,41 +439,38 @@ app.post('/api/calendar/events/reschedule', async (req, res) => {
   }
 });
 
-// Clear events within a date range
 app.post('/api/calendar/clear-range', async (req, res) => {
   console.log('Clear endpoint called');
   if (!req.session.tokens) {
     console.log('No tokens in session');
     return res.status(401).json({ error: 'Not authenticated' });
   }
-  const { range, referenceDate } = req.body;
-  console.log('Range:', range, 'Ref:', referenceDate);
-  const dateRange = getDateRangeForClear(range, referenceDate);
-  console.log('Date range:', dateRange);
+  const { range, referenceDate, userDate } = req.body;
+  console.log('Received userDate:', userDate);
+  // Use user's local date as base (noon UTC to avoid timezone shifts)
+  const baseDate = userDate ? new Date(userDate + 'T12:00:00Z') : new Date();
+  console.log('Base date for calculations:', baseDate);
+  
+  const dateRange = getDateRangeForClear(range, referenceDate, baseDate);
+  console.log('Computed date range:', dateRange);
   if (!dateRange) return res.status(400).json({ error: 'Invalid range' });
 
   try {
-    console.log('Entering try block');
     oauth2Client.setCredentials(req.session.tokens);
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-    console.log('Fetching events from', dateRange.startDate, 'to', dateRange.endDate);
     const eventsResponse = await calendar.events.list({
       calendarId: 'primary',
       timeMin: dateRange.startDate,
       timeMax: dateRange.endDate,
       singleEvents: true,
     });
-    console.log('Found', eventsResponse.data.items.length, 'events');
     const events = eventsResponse.data.items;
     for (const event of events) {
-      console.log('Deleting event:', event.summary);
       await calendar.events.delete({ calendarId: 'primary', eventId: event.id });
     }
-    console.log('All events deleted');
     res.json({ success: true, deletedCount: events.length });
   } catch (err) {
     console.error('Error in clear-range:', err.message);
-    console.error(err.stack);
     res.status(500).json({ error: 'Failed to clear schedule' });
   }
 });

@@ -103,11 +103,13 @@ function App() {
 
       if (intent === 'clear_schedule' && data.intent?.clearDetails?.range) {
         const { range, referenceDate } = data.intent.clearDetails;
-        console.log('Clearing schedule:', range, referenceDate);
+        // Get user's local date in YYYY-MM-DD
+        const userDate = new Date().toLocaleDateString('en-CA'); // 'en-CA' gives YYYY-MM-DD
         try {
           const response = await axios.post(`${API_BASE}/api/calendar/clear-range`, {
             range,
-            referenceDate: referenceDate || null
+            referenceDate: referenceDate || null,
+            userDate   // send to backend
           }, { withCredentials: true });
           alert(`Cleared ${response.data.deletedCount} event(s).`);
           setRefreshCalendar(refreshCalendar + 1);
