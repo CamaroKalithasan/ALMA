@@ -441,36 +441,39 @@ app.post('/api/calendar/events/reschedule', async (req, res) => {
 
 // Clear events within a date range
 app.post('/api/calendar/clear-range', async (req, res) => {
-  console.log('Clear range request body:', req.body);
-const { range, referenceDate } = req.body;
-console.log('Range:', range, 'ReferenceDate:', referenceDate);
-const dateRange = getDateRangeForClear(range, referenceDate);
-console.log('Calculated dateRange:', dateRange);
-if (!dateRange) return res.status(400).json({ error: 'Invalid range' });
-  if (!req.session.tokens) return res.status(401).json({ error: 'Not authenticated' });
-  const { startDate, endDate } = req.body;
-  if (!startDate || !endDate) return res.status(400).json({ error: 'Start and end date required' });
+  console.log('Clear endpoint called');
+  if (!req.session.tokens) {
+    console.log('No tokens in session');
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  const { range, referenceDate } = req.body;
+  console.log('Range:', range, 'Ref:', referenceDate);
+  const dateRange = getDateRangeForClear(range, referenceDate);
+  console.log('Date range:', dateRange);
+  if (!dateRange) return res.status(400).json({ error: 'Invalid range' });
 
   try {
+    console.log('Entering try block');
     oauth2Client.setCredentials(req.session.tokens);
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-
-    // List events between start and end
+    console.log('Fetching events from', dateRange.startDate, 'to', dateRange.endDate);
     const eventsResponse = await calendar.events.list({
       calendarId: 'primary',
-      timeMin: new Date(startDate).toISOString(),
-      timeMax: new Date(endDate).toISOString(),
+      timeMin: dateRange.startDate,
+      timeMax: dateRange.endDate,
       singleEvents: true,
     });
+    console.log('Found', eventsResponse.data.items.length, 'events');
     const events = eventsResponse.data.items;
-
-    // Delete each event
     for (const event of events) {
+      console.log('Deleting event:', event.summary);
       await calendar.events.delete({ calendarId: 'primary', eventId: event.id });
     }
+    console.log('All events deleted');
     res.json({ success: true, deletedCount: events.length });
   } catch (err) {
-    console.error('Error clearing schedule range:', err);
+    console.error('Error in clear-range:', err.message);
+    console.error(err.stack);
     res.status(500).json({ error: 'Failed to clear schedule' });
   }
 });
