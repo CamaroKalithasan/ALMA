@@ -38,9 +38,11 @@ const VoiceRecorder = ({ onTranscriptionComplete, onRecordingStateChange }) => {
           const userOffsetString = `${sign}${String(absOffset).padStart(2,'0')}:00`;
           
           try {
+            const userLocalDate = new Date().toLocaleDateString('en-CA');
             const response = await axios.post(`${API_BASE}/api/process-voice`, {
               audio: base64Audio,
-              userTimezone: userOffsetString
+              userTimezone: userOffsetString,
+              userDate: userLocalDate
             }, { withCredentials: true });
             
             setStatus('Done!');

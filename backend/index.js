@@ -177,7 +177,7 @@ app.delete('/api/shopping/clear', async (req, res) => {
 
 // -------------------- Voice Processing (Whisper + GPT) --------------------
 app.post('/api/process-voice', async (req, res) => {
-  const { audio, userTimezone } = req.body;
+  const { audio, userTimezone, userDate } = req.body;
   try {
     const base64Data = audio.split(',')[1];
     const audioBuffer = Buffer.from(base64Data, 'base64');
@@ -186,6 +186,7 @@ app.post('/api/process-voice', async (req, res) => {
     const text = transcription.text;
 
     const now = new Date();
+    const todayStr = userDate || now.toLocaleDateString('en-CA');
     const serverOffsetMinutes = now.getTimezoneOffset();
     const serverOffsetHours = Math.floor(Math.abs(serverOffsetMinutes) / 60);
     const serverOffsetSign = serverOffsetMinutes > 0 ? '-' : '+';
@@ -199,7 +200,7 @@ app.post('/api/process-voice', async (req, res) => {
         {
           role: 'system',
           content: `You are Alma, an AI life management assistant. 
-          Today is ${now.toLocaleDateString('en-CA')} and the current time is ${now.toLocaleTimeString('en-US', { hour12: false })}.
+          Today is ${todayStr} and the current time is ${now.toLocaleTimeString('en-US', { hour12: false })}.
           The current timezone offset is ${offsetString} (e.g., -04:00 for EDT). 
           When generating ISO 8601 date-time strings, ALWAYS use this offset.
 
