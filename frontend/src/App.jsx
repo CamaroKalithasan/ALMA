@@ -121,7 +121,8 @@ function App() {
         }
       }
       if (intent === 'shopping_remove') {
-        let itemName = data.intent?.shoppingDetails?.item;
+        let itemName = data.intent?.shoppingRemoveDetails?.item || data.intent?.shoppingDetails?.item;
+        console.log('shopping_remove triggered, itemName:', itemName);
         // Check if user wants to remove everything
         if (itemName && ['everything', 'all', 'everything from list', 'all items', 'the whole list'].some(phrase => itemName.toLowerCase().includes(phrase))) {
           console.log('Clearing entire shopping list');
@@ -132,6 +133,7 @@ function App() {
               console.log('Incrementing refreshShopping from', prev, 'to', prev + 1);
               return prev + 1;
             });
+            console.log('refreshShopping after update:', refreshShopping + 1);
             alert('Shopping list cleared!');
           } catch (err) {
             console.error('Failed to clear shopping list', err);
