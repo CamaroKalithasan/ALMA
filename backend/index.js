@@ -441,6 +441,12 @@ app.post('/api/calendar/events/reschedule', async (req, res) => {
 
 // Clear events within a date range
 app.post('/api/calendar/clear-range', async (req, res) => {
+  console.log('Clear range request body:', req.body);
+const { range, referenceDate } = req.body;
+console.log('Range:', range, 'ReferenceDate:', referenceDate);
+const dateRange = getDateRangeForClear(range, referenceDate);
+console.log('Calculated dateRange:', dateRange);
+if (!dateRange) return res.status(400).json({ error: 'Invalid range' });
   if (!req.session.tokens) return res.status(401).json({ error: 'Not authenticated' });
   const { startDate, endDate } = req.body;
   if (!startDate || !endDate) return res.status(400).json({ error: 'Start and end date required' });
