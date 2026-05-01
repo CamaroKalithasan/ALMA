@@ -205,8 +205,8 @@ app.post('/api/process-voice', async (req, res) => {
 
           Extract the following from the user's message in JSON format. Do NOT use markdown code blocks or backticks. Return plain JSON only.
 
-            - intent: create_event, delete_event, check_schedule, feeling_overwhelmed, shopping_add, shopping_show, shopping_remove, or other
-              If the user expresses being overwhelmed, tired, exhausted, stressed, burnt out, or overloaded, set intent to "feeling_overwhelmed".
+            - intent: create_event, delete_event, check_schedule, feeling_overwhelmed, shopping_add, shopping_show, shopping_remove, 
+            clear_schedule, or other
             - emotionalState: overwhelmed, tired, fine, etc.
             - affectedDate: if mentioned (e.g., "tomorrow", "next Monday") – use YYYY-MM-DD if possible
             - eventDetails: (only if intent is create_event) an object with:
@@ -219,6 +219,9 @@ app.post('/api/process-voice', async (req, res) => {
                 * summary (string, required)
                 * startTime: ISO 8601 string with offset (if mentioned, helps identify the exact event)
                 * description (optional)
+            - clearDetails: (only if intent is clear_schedule) an object with:
+                * range: string (one of "day", "week", "weekend", "month")
+                * referenceDate: optional string like "Friday", "tomorrow", "next week", "next month"
             - shoppingDetails: (only if intent is shopping_add) an object with:
                 * items: array of strings (e.g., ["eggs", "bacon", "toast"])
                   Split the user's request into individual items. 
@@ -241,6 +244,10 @@ app.post('/api/process-voice', async (req, res) => {
                 User: "I'm exhausted" → {"intent":"feeling_overwhelmed","emotionalState":"exhausted"}
                 User: "I'm overwhelmed" → {"intent":"feeling_overwhelmed","emotionalState":"overwhelmed"}
                 User: "I'm stressed" → {"intent":"feeling_overwhelmed","emotionalState":"stressed"}
+                User: "clear my schedule for the week" → {"intent":"clear_schedule","clearDetails":{"range":"week"}}
+                User: "remove all events on Friday" → {"intent":"clear_schedule","clearDetails":{"range":"day","referenceDate":"Friday"}}
+                User: "delete everything this weekend" → {"intent":"clear_schedule","clearDetails":{"range":"weekend"}}
+                User: "clear my schedule for next month" → {"intent":"clear_schedule","clearDetails":{"range":"month"}}
 
           Respond with valid JSON only.`
         },
@@ -335,6 +342,82 @@ async function findFreeSlot(authClient, startFrom, durationMs) {
   return null;
 }
 
+function getDateRangeForClear(range, referenceDateStr = null, baseDate = new Date()) {
+  const refDate = referenceDateStr ? parseNaturalDate(referenceDateStr, baseDate) : baseDate;
+  let start, end;
+  switch (range) {
+    case 'day':
+      start = new Date(refDate);
+      start.setHours(0,0,0,0);
+      end = new Date(refDate);
+      end.setHours(23,59,59,999);
+      break;
+    case 'week':
+      // Monday to Sunday
+      const monday = new Date(refDate);
+      const dayOfWeek = refDate.getDay();
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      monday.setDate(refDate.getDate() - daysToMonday);
+      monday.setHours(0,0,0,0);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      sunday.setHours(23,59,59,999);
+      start = monday;
+      end = sunday;
+      break;
+    case 'weekend':
+      // Saturday and Sunday
+      const saturday = new Date(refDate);
+      const daysToSaturday = refDate.getDay() === 0 ? 6 : 6 - refDate.getDay();
+      saturday.setDate(refDate.getDate() + daysToSaturday);
+      saturday.setHours(0,0,0,0);
+      const sundayWeekend = new Date(saturday);
+      sundayWeekend.setDate(saturday.getDate() + 1);
+      sundayWeekend.setHours(23,59,59,999);
+      start = saturday;
+      end = sundayWeekend;
+      break;
+    case 'month':
+      start = new Date(refDate.getFullYear(), refDate.getMonth(), 1);
+      start.setHours(0,0,0,0);
+      end = new Date(refDate.getFullYear(), refDate.getMonth() + 1, 0);
+      end.setHours(23,59,59,999);
+      break;
+    default:
+      return null;
+  }
+  return { startDate: start.toISOString(), endDate: end.toISOString() };
+}
+
+// Helper: parse natural language date references (e.g., "tomorrow", "Friday", "next week")
+function parseNaturalDate(str, baseDate = new Date()) {
+  const lower = str.toLowerCase().trim();
+  const date = new Date(baseDate);
+  if (lower === 'today') return date;
+  if (lower === 'tomorrow') {
+    date.setDate(date.getDate() + 1);
+    return date;
+  }
+  const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const dayIndex = weekdays.indexOf(lower);
+  if (dayIndex !== -1) {
+    const currentDay = date.getDay();
+    let offset = dayIndex - currentDay;
+    if (offset <= 0) offset += 7; // next occurrence
+    date.setDate(date.getDate() + offset);
+    return date;
+  }
+  if (lower === 'next week') {
+    date.setDate(date.getDate() + 7);
+    return date;
+  }
+  if (lower === 'next month') {
+    date.setMonth(date.getMonth() + 1);
+    return date;
+  }
+  return baseDate; // fallback
+}
+
 // Reschedule endpoint (unchanged)
 app.post('/api/calendar/events/reschedule', async (req, res) => {
   if (!req.session.tokens) return res.status(401).json({ error: 'Not authenticated' });
@@ -353,6 +436,36 @@ app.post('/api/calendar/events/reschedule', async (req, res) => {
   } catch (error) {
     console.error('Error rescheduling event:', error.response?.data || error.message);
     res.status(500).json({ error: 'Reschedule failed', details: error.message });
+  }
+});
+
+// Clear events within a date range
+app.post('/api/calendar/clear-range', async (req, res) => {
+  if (!req.session.tokens) return res.status(401).json({ error: 'Not authenticated' });
+  const { startDate, endDate } = req.body;
+  if (!startDate || !endDate) return res.status(400).json({ error: 'Start and end date required' });
+
+  try {
+    oauth2Client.setCredentials(req.session.tokens);
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+
+    // List events between start and end
+    const eventsResponse = await calendar.events.list({
+      calendarId: 'primary',
+      timeMin: new Date(startDate).toISOString(),
+      timeMax: new Date(endDate).toISOString(),
+      singleEvents: true,
+    });
+    const events = eventsResponse.data.items;
+
+    // Delete each event
+    for (const event of events) {
+      await calendar.events.delete({ calendarId: 'primary', eventId: event.id });
+    }
+    res.json({ success: true, deletedCount: events.length });
+  } catch (err) {
+    console.error('Error clearing schedule range:', err);
+    res.status(500).json({ error: 'Failed to clear schedule' });
   }
 });
 

@@ -101,6 +101,22 @@ function App() {
         setRefreshCalendar(prev => prev + 1);
       }
 
+      if (intent === 'clear_schedule' && data.intent?.clearDetails?.range) {
+        const { range, referenceDate } = data.intent.clearDetails;
+        console.log('Clearing schedule:', range, referenceDate);
+        try {
+          const response = await axios.post(`${API_BASE}/api/calendar/clear-range`, {
+            range,
+            referenceDate: referenceDate || null
+          }, { withCredentials: true });
+          alert(`Cleared ${response.data.deletedCount} event(s).`);
+          setRefreshCalendar(refreshCalendar + 1);
+        } catch (err) {
+          console.error('Failed to clear schedule', err);
+          alert('Could not clear schedule. Please try again.');
+        }
+      }
+
       if (intent === 'shopping_add') {
         let items = [];
         if (data.intent?.shoppingDetails?.items) {
