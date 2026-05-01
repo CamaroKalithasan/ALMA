@@ -206,6 +206,7 @@ app.post('/api/process-voice', async (req, res) => {
           Extract the following from the user's message in JSON format. Do NOT use markdown code blocks or backticks. Return plain JSON only.
 
             - intent: create_event, delete_event, check_schedule, feeling_overwhelmed, shopping_add, shopping_show, shopping_remove, or other
+              If the user expresses being overwhelmed, tired, exhausted, stressed, burnt out, or overloaded, set intent to "feeling_overwhelmed".
             - emotionalState: overwhelmed, tired, fine, etc.
             - affectedDate: if mentioned (e.g., "tomorrow", "next Monday") – use YYYY-MM-DD if possible
             - eventDetails: (only if intent is create_event) an object with:
@@ -236,6 +237,10 @@ app.post('/api/process-voice', async (req, res) => {
                 User: "remove everything from my shopping list" → {"intent":"shopping_remove","shoppingRemoveDetails":{"item":"everything"}}
                 User: "clear all items" → {"intent":"shopping_remove","shoppingRemoveDetails":{"item":"everything"}}
                 User: "delete my meeting tomorrow" → {"intent":"delete_event","deleteDetails":{"summary":"meeting","startTime":"2025-03-25T10:00:00-04:00"}}
+                User: "I'm tired" → {"intent":"feeling_overwhelmed","emotionalState":"tired"}
+                User: "I'm exhausted" → {"intent":"feeling_overwhelmed","emotionalState":"exhausted"}
+                User: "I'm overwhelmed" → {"intent":"feeling_overwhelmed","emotionalState":"overwhelmed"}
+                User: "I'm stressed" → {"intent":"feeling_overwhelmed","emotionalState":"stressed"}
 
           Respond with valid JSON only.`
         },
